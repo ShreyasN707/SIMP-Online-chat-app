@@ -3,157 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
   <title>Dark Chat Room</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1e2b38, #16222A);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      color: #e0e0e0;
-    }
-
-    .chat-window {
-      width: 100%;
-      max-width: 700px;
-      height: 90vh;
-      max-height: 800px;
-      background: #222c35;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border: 1px solid #2c3e50;
-    }
-
-    .chat-header {
-      background-color: #0f2027;
-      color: #00ffe1;
-      padding: 20px;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      border-bottom: 1px solid #2c3e50;
-    }
-
-    .chat-box {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #1b242f;
-      scroll-behavior: smooth;
-    }
-
-    .message {
-      max-width: 80%;
-      padding: 12px 16px;
-      border-radius: 14px;
-      background: #2c3e50;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      word-wrap: break-word;
-      position: relative;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-
-    .message.you {
-      align-self: flex-end;
-      background: #00ffe133;
-    }
-
-    .username {
-      font-size: 0.9rem;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #00ffe1;
-    }
-
-    .chat-form {
-      display: flex;
-      padding: 15px;
-      background-color: #1e2a35;
-      border-top: 1px solid #2c3e50;
-    }
-
-    .chat-form input {
-      flex: 1;
-      padding: 12px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 10px;
-      outline: none;
-      background: #2c3e50;
-      color: #e0e0e0;
-      margin-right: 12px;
-    }
-
-    .chat-form button {
-      padding: 12px 24px;
-      background-color: #00ffe1;
-      border: none;
-      border-radius: 10px;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .chat-form button:hover {
-      background-color: #00e6cc;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media screen and (max-width: 768px) {
-      .chat-window {
-        height: 95vh;
-        border-radius: 12px;
-      }
-
-      .chat-form input,
-      .chat-form button {
-        font-size: 0.9rem;
-        padding: 10px;
-      }
-    }
-
-    @media screen and (max-width: 480px) {
-      .chat-header {
-        font-size: 1.2rem;
-        padding: 15px;
-      }
-
-      .chat-form {
-        padding: 10px;
-      }
-
-      .chat-box {
-        padding: 12px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="chat-window">
     <div class="chat-header">💬 Talk Room</div>
     <div class="chat-box" id="chat-box"></div>
     <form class="chat-form" id="chat-form">
-      <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" required />
+      <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" required maxlength="500" />
       <button type="submit">Send</button>
     </form>
   </div>
@@ -167,32 +28,93 @@
 
     let username = '';
 
-    while (!username) {
-      username = prompt("Enter your name:");
+    // Secure username input with validation and escape mechanism
+    function getUsername() {
+      let attempts = 0;
+      while (!username && attempts < 3) {
+        const input = prompt("Enter your name (3-20 characters):");
+        if (input === null) { // User clicked cancel
+          if (confirm("You need a username to chat. Try again?")) {
+            attempts++;
+            continue;
+          } else {
+            document.body.innerHTML = '<div style="text-align: center; margin-top: 50px; color: #888;">Chat cancelled. Please refresh to try again.</div>';
+            return false;
+          }
+        }
+        
+        const trimmedInput = input.trim();
+        if (trimmedInput.length >= 3 && trimmedInput.length <= 20) {
+          // Basic sanitization - remove HTML tags and limit to alphanumeric + spaces
+          username = trimmedInput.replace(/<[^>]*>/g, '').replace(/[^\w\s-]/g, '');
+          if (username.length < 3) {
+            alert("Username must contain at least 3 valid characters (letters, numbers, spaces, hyphens)");
+            username = '';
+          }
+        } else {
+          alert("Username must be between 3-20 characters long");
+        }
+        attempts++;
+      }
+      
+      if (!username) {
+        document.body.innerHTML = '<div style="text-align: center; margin-top: 50px; color: #888;">Too many failed attempts. Please refresh to try again.</div>';
+        return false;
+      }
+      return true;
     }
 
-    socket.emit("set-username", username);
+    if (!getUsername()) {
+      // Exit if username setup failed
+    } else {
+      socket.emit("set-username", username);
 
-    chatForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const msg = messageInput.value.trim();
-      if (msg) {
-        socket.emit('chat-message', { user: username, message: msg });
-        messageInput.value = '';
+      chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const msg = messageInput.value.trim();
+        if (msg && msg.length <= 500) {
+          socket.emit('chat-message', { user: username, message: msg });
+          messageInput.value = '';
+        } else if (msg.length > 500) {
+          alert("Message too long! Maximum 500 characters allowed.");
+        }
+      });
+
+      socket.on('chat-message', (data) => {
+        appendMessage(data.user, data.message);
+      });
+
+      // Secure message rendering - prevents XSS attacks
+      function appendMessage(user, message) {
+        const msgEl = document.createElement('div');
+        msgEl.classList.add('message');
+        if (user === username) msgEl.classList.add('you');
+        
+        // Create username element safely
+        const usernameEl = document.createElement('div');
+        usernameEl.className = 'username';
+        usernameEl.textContent = user; // Use textContent instead of innerHTML
+        
+        // Create message element safely
+        const messageEl = document.createElement('div');
+        messageEl.textContent = message; // Use textContent instead of innerHTML
+        
+        // Append elements safely
+        msgEl.appendChild(usernameEl);
+        msgEl.appendChild(messageEl);
+        chatBox.appendChild(msgEl);
+        chatBox.scrollTop = chatBox.scrollHeight;
       }
-    });
 
-    socket.on('chat-message', (data) => {
-      appendMessage(data.user, data.message);
-    });
+      // Connection status feedback
+      socket.on('connect', () => {
+        console.log('Connected to chat server');
+      });
 
-    function appendMessage(user, message) {
-      const msgEl = document.createElement('div');
-      msgEl.classList.add('message');
-      if (user === username) msgEl.classList.add('you');
-      msgEl.innerHTML = `<div class="username">${user}</div><div>${message}</div>`;
-      chatBox.appendChild(msgEl);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      socket.on('disconnect', () => {
+        console.log('Disconnected from chat server');
+        // Optional: Show reconnection message
+      });
     }
   </script>
 </body>

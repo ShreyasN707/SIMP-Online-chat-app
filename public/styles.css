@@ -1,0 +1,153 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #1e2b38, #16222A);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  color: #e0e0e0;
+}
+
+.chat-window {
+  width: 100%;
+  max-width: 700px;
+  height: 90vh;
+  max-height: 800px;
+  background: #222c35;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #2c3e50;
+}
+
+.chat-header {
+  background-color: #0f2027;
+  color: #00ffe1;
+  padding: 20px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-bottom: 1px solid #2c3e50;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #1b242f;
+  scroll-behavior: smooth;
+}
+
+.message {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #2c3e50;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  word-wrap: break-word;
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.message.you {
+  align-self: flex-end;
+  background: #00ffe133;
+}
+
+.username {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #00ffe1;
+}
+
+.chat-form {
+  display: flex;
+  padding: 15px;
+  background-color: #1e2a35;
+  border-top: 1px solid #2c3e50;
+}
+
+.chat-form input {
+  flex: 1;
+  padding: 12px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 10px;
+  outline: none;
+  background: #2c3e50;
+  color: #e0e0e0;
+  margin-right: 12px;
+}
+
+.chat-form button {
+  padding: 12px 24px;
+  background-color: #00ffe1;
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.chat-form button:hover {
+  background-color: #00e6cc;
+}
+
+.chat-form button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media screen and (max-width: 768px) {
+  .chat-window {
+    height: 95vh;
+    border-radius: 12px;
+  }
+
+  .chat-form input,
+  .chat-form button {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .chat-header {
+    font-size: 1.2rem;
+    padding: 15px;
+  }
+
+  .chat-form {
+    padding: 10px;
+  }
+
+  .chat-box {
+    padding: 12px;
+  }
+}
