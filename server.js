@@ -4,7 +4,7 @@ const express = require("express");
 const { Server } = require("socket.io");
 
 require('dotenv').config();
-PORT=process.env.PORT || 6045;
+PORT=process.env.PORT || 3000;
 
 const app = express();
 const server = http.createServer(app);
@@ -46,6 +46,6 @@ io.on("connection", (socket) => {
 });
 
 // Start server
-server.listen(4000, () => {
+server.listen(PORT, () => {
   console.log(`Server Running at PORT :${PORT}`);
 });
