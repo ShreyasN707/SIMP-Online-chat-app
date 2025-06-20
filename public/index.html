@@ -11,7 +11,10 @@
 </head>
 <body>
   <div class="chat-window">
-    <div class="chat-header">💬 Talk Room</div>
+    <div class="chat-header">
+      <div class="header-title">💬 Talk Room</div>
+      <div class="user-count" id="user-count">👥 0 online</div>
+    </div>
     <div class="chat-box" id="chat-box"></div>
     <form class="chat-form" id="chat-form">
       <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" required maxlength="500" />
@@ -25,6 +28,7 @@
     const chatBox = document.getElementById('chat-box');
     const chatForm = document.getElementById('chat-form');
     const messageInput = document.getElementById('message-input');
+    const userCountElement = document.getElementById('user-count');
 
     let username = '';
 
@@ -83,6 +87,16 @@
       socket.on('chat-message', (data) => {
         appendMessage(data.user, data.message, data.timestamp);
       });
+
+      socket.on('user-count', (data) => {
+        updateUserCount(data.count);
+      });
+
+      // Update user count display
+      function updateUserCount(count) {
+        const text = count === 1 ? '👥 1 online' : `👥 ${count} online`;
+        userCountElement.textContent = text;
+      }
 
       // Secure message rendering - prevents XSS attacks
       function appendMessage(user, message, timestamp) {
