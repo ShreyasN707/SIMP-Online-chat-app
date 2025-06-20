@@ -82,7 +82,8 @@ io.on("connection", (socket) => {
     // Broadcast the message (HTML tags already removed on client side, but double-check)
     io.emit("chat-message", {
       user: username,
-      message: message.replace(/<[^>]*>/g, '') // Remove any HTML tags
+      message: message.replace(/<[^>]*>/g, ''), // Remove any HTML tags
+      timestamp: new Date().toISOString()
     });
   });
 
