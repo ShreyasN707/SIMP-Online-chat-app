@@ -81,14 +81,18 @@
       });
 
       socket.on('chat-message', (data) => {
-        appendMessage(data.user, data.message);
+        appendMessage(data.user, data.message, data.timestamp);
       });
 
       // Secure message rendering - prevents XSS attacks
-      function appendMessage(user, message) {
+      function appendMessage(user, message, timestamp) {
         const msgEl = document.createElement('div');
         msgEl.classList.add('message');
         if (user === username) msgEl.classList.add('you');
+        
+        // Create message bubble container
+        const bubbleEl = document.createElement('div');
+        bubbleEl.className = 'message-bubble';
         
         // Create username element safely
         const usernameEl = document.createElement('div');
@@ -97,11 +101,34 @@
         
         // Create message element safely
         const messageEl = document.createElement('div');
+        messageEl.className = 'message-text';
         messageEl.textContent = message; // Use textContent instead of innerHTML
         
+        // Create timestamp element
+        const timestampEl = document.createElement('div');
+        timestampEl.className = 'timestamp';
+        if (timestamp) {
+          const date = new Date(timestamp);
+          const now = new Date();
+          const isToday = date.toDateString() === now.toDateString();
+          
+          if (isToday) {
+            timestampEl.textContent = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          } else {
+            timestampEl.textContent = date.toLocaleString([], {
+              month: 'short', 
+              day: 'numeric', 
+              hour: '2-digit', 
+              minute:'2-digit'
+            });
+          }
+        }
+        
         // Append elements safely
-        msgEl.appendChild(usernameEl);
-        msgEl.appendChild(messageEl);
+        bubbleEl.appendChild(usernameEl);
+        bubbleEl.appendChild(messageEl);
+        bubbleEl.appendChild(timestampEl);
+        msgEl.appendChild(bubbleEl);
         chatBox.appendChild(msgEl);
         chatBox.scrollTop = chatBox.scrollHeight;
       }
