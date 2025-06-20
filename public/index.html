@@ -13,7 +13,19 @@
   <div class="chat-window">
     <div class="chat-header">
       <div class="header-title">💬 Talk Room</div>
-      <div class="user-count" id="user-count">👥 0 online</div>
+      <div class="header-controls">
+        <div class="user-count" id="user-count">👥 0 online</div>
+        <div class="theme-switcher">
+          <button id="theme-button" class="theme-btn" title="Switch Theme">🎨</button>
+          <div class="theme-dropdown" id="theme-dropdown">
+            <div class="theme-option" data-theme="dark">🌙 Dark</div>
+            <div class="theme-option" data-theme="light">☀️ Light</div>
+            <div class="theme-option" data-theme="blue">🌊 Ocean</div>
+            <div class="theme-option" data-theme="green">🌿 Forest</div>
+            <div class="theme-option" data-theme="purple">🔮 Cosmic</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="chat-box" id="chat-box"></div>
     <div class="typing-indicator" id="typing-indicator"></div>
@@ -31,11 +43,14 @@
     const messageInput = document.getElementById('message-input');
     const userCountElement = document.getElementById('user-count');
     const typingIndicator = document.getElementById('typing-indicator');
+    const themeButton = document.getElementById('theme-button');
+    const themeDropdown = document.getElementById('theme-dropdown');
 
     let username = '';
     let typingUsers = new Set();
     let typingTimeout = null;
     let isTyping = false;
+    let currentTheme = localStorage.getItem('chatTheme') || 'dark';
 
     // Secure username input with validation and escape mechanism
     function getUsername() {
@@ -77,6 +92,29 @@
       // Exit if username setup failed
     } else {
       socket.emit("set-username", username);
+
+      // Initialize theme
+      initializeTheme();
+
+      // Theme switcher functionality
+      themeButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        themeDropdown.classList.toggle('show');
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', () => {
+        themeDropdown.classList.remove('show');
+      });
+
+      // Theme selection
+      document.querySelectorAll('.theme-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+          const theme = e.target.getAttribute('data-theme');
+          setTheme(theme);
+          themeDropdown.classList.remove('show');
+        });
+      });
 
       chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -210,6 +248,25 @@
         msgEl.appendChild(bubbleEl);
         chatBox.appendChild(msgEl);
         chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      // Theme management functions
+      function initializeTheme() {
+        setTheme(currentTheme);
+      }
+
+      function setTheme(theme) {
+        currentTheme = theme;
+        document.body.className = `theme-${theme}`;
+        localStorage.setItem('chatTheme', theme);
+        
+        // Update active theme option
+        document.querySelectorAll('.theme-option').forEach(option => {
+          option.classList.remove('active');
+          if (option.getAttribute('data-theme') === theme) {
+            option.classList.add('active');
+          }
+        });
       }
 
       // Connection status feedback
