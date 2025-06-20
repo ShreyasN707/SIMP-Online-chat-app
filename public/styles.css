@@ -60,6 +60,35 @@ body {
   scroll-behavior: smooth;
 }
 
+.typing-indicator {
+  padding: 8px 20px;
+  background: #1b242f;
+  border-top: 1px solid rgba(44, 62, 80, 0.3);
+  color: rgba(224, 224, 224, 0.7);
+  font-size: 0.85rem;
+  font-style: italic;
+  min-height: 20px;
+  display: none;
+}
+
+.typing-text {
+  color: #00ffe1;
+}
+
+.typing-dots {
+  animation: typingDots 1.5s infinite;
+  color: #00ffe1;
+}
+
+@keyframes typingDots {
+  0%, 60% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
 .message {
   max-width: 80%;
   margin-bottom: 12px;
@@ -186,6 +215,11 @@ body {
     font-size: 0.85rem;
   }
 
+  .typing-indicator {
+    padding: 6px 15px;
+    font-size: 0.8rem;
+  }
+
   .chat-form input,
   .chat-form button {
     font-size: 0.9rem;
@@ -227,6 +261,11 @@ body {
 
   .user-count {
     font-size: 0.8rem;
+  }
+
+  .typing-indicator {
+    padding: 5px 12px;
+    font-size: 0.75rem;
   }
 
   .chat-form {
