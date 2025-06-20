@@ -23,6 +23,16 @@ app.use((req, res, next) => {
 // Store usernames mapped to socket IDs
 const users = {};
 
+// Function to get active user count
+function getActiveUserCount() {
+  return Object.keys(users).length;
+}
+
+// Function to broadcast user count to all clients
+function broadcastUserCount() {
+  io.emit("user-count", { count: getActiveUserCount() });
+}
+
 // Serve static files
 app.use(express.static(path.resolve('./public')));
 
@@ -50,6 +60,9 @@ io.on("connection", (socket) => {
     } else {
       users[socket.id] = "User_" + socket.id.substring(0, 6); // Fallback username
     }
+    
+    // Broadcast updated user count
+    broadcastUserCount();
   });
 
   // ✅ Handle incoming messages with validation and rate limiting
@@ -91,6 +104,9 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
     delete users[socket.id];
+    
+    // Broadcast updated user count
+    broadcastUserCount();
   });
 });
 

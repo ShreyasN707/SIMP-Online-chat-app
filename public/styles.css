@@ -33,10 +33,21 @@ body {
   background-color: #0f2027;
   color: #00ffe1;
   padding: 20px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #2c3e50;
+}
+
+.header-title {
   font-size: 1.5rem;
   font-weight: bold;
-  border-bottom: 1px solid #2c3e50;
+}
+
+.user-count {
+  font-size: 0.9rem;
+  color: rgba(0, 255, 225, 0.8);
+  font-weight: 500;
 }
 
 .chat-box {
@@ -167,6 +178,14 @@ body {
     border-radius: 12px;
   }
 
+  .header-title {
+    font-size: 1.3rem;
+  }
+
+  .user-count {
+    font-size: 0.85rem;
+  }
+
   .chat-form input,
   .chat-form button {
     font-size: 0.9rem;
@@ -197,8 +216,17 @@ body {
 
 @media screen and (max-width: 480px) {
   .chat-header {
-    font-size: 1.2rem;
     padding: 15px;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .header-title {
+    font-size: 1.2rem;
+  }
+
+  .user-count {
+    font-size: 0.8rem;
   }
 
   .chat-form {
