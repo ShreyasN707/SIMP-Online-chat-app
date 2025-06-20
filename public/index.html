@@ -16,6 +16,7 @@
       <div class="user-count" id="user-count">👥 0 online</div>
     </div>
     <div class="chat-box" id="chat-box"></div>
+    <div class="typing-indicator" id="typing-indicator"></div>
     <form class="chat-form" id="chat-form">
       <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" required maxlength="500" />
       <button type="submit">Send</button>
@@ -29,8 +30,12 @@
     const chatForm = document.getElementById('chat-form');
     const messageInput = document.getElementById('message-input');
     const userCountElement = document.getElementById('user-count');
+    const typingIndicator = document.getElementById('typing-indicator');
 
     let username = '';
+    let typingUsers = new Set();
+    let typingTimeout = null;
+    let isTyping = false;
 
     // Secure username input with validation and escape mechanism
     function getUsername() {
@@ -79,9 +84,40 @@
         if (msg && msg.length <= 500) {
           socket.emit('chat-message', { user: username, message: msg });
           messageInput.value = '';
+          
+          // Stop typing when message is sent
+          if (isTyping) {
+            socket.emit('stop-typing');
+            isTyping = false;
+          }
         } else if (msg.length > 500) {
           alert("Message too long! Maximum 500 characters allowed.");
         }
+      });
+
+      // Handle typing indicators
+      messageInput.addEventListener('input', () => {
+        if (!isTyping) {
+          socket.emit('typing');
+          isTyping = true;
+        }
+        
+        // Clear existing timeout
+        clearTimeout(typingTimeout);
+        
+        // Set new timeout to stop typing after 2 seconds of inactivity
+        typingTimeout = setTimeout(() => {
+          socket.emit('stop-typing');
+          isTyping = false;
+        }, 2000);
+      });
+
+      messageInput.addEventListener('blur', () => {
+        if (isTyping) {
+          socket.emit('stop-typing');
+          isTyping = false;
+        }
+        clearTimeout(typingTimeout);
       });
 
       socket.on('chat-message', (data) => {
@@ -92,10 +128,39 @@
         updateUserCount(data.count);
       });
 
+      socket.on('user-typing', (data) => {
+        typingUsers.add(data.user);
+        updateTypingIndicator();
+      });
+
+      socket.on('user-stop-typing', (data) => {
+        typingUsers.delete(data.user);
+        updateTypingIndicator();
+      });
+
       // Update user count display
       function updateUserCount(count) {
         const text = count === 1 ? '👥 1 online' : `👥 ${count} online`;
         userCountElement.textContent = text;
+      }
+
+      // Update typing indicator display
+      function updateTypingIndicator() {
+        const typingArray = Array.from(typingUsers);
+        
+        if (typingArray.length === 0) {
+          typingIndicator.style.display = 'none';
+          typingIndicator.textContent = '';
+        } else if (typingArray.length === 1) {
+          typingIndicator.style.display = 'block';
+          typingIndicator.innerHTML = `<span class="typing-text">${typingArray[0]} is typing</span><span class="typing-dots">...</span>`;
+        } else if (typingArray.length === 2) {
+          typingIndicator.style.display = 'block';
+          typingIndicator.innerHTML = `<span class="typing-text">${typingArray[0]} and ${typingArray[1]} are typing</span><span class="typing-dots">...</span>`;
+        } else {
+          typingIndicator.style.display = 'block';
+          typingIndicator.innerHTML = `<span class="typing-text">Several people are typing</span><span class="typing-dots">...</span>`;
+        }
       }
 
       // Secure message rendering - prevents XSS attacks

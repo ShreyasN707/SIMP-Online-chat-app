@@ -65,6 +65,17 @@ io.on("connection", (socket) => {
     broadcastUserCount();
   });
 
+  // ✅ Handle typing indicators
+  socket.on("typing", () => {
+    const username = users[socket.id] || "Anonymous";
+    socket.broadcast.emit("user-typing", { user: username, socketId: socket.id });
+  });
+
+  socket.on("stop-typing", () => {
+    const username = users[socket.id] || "Anonymous";
+    socket.broadcast.emit("user-stop-typing", { user: username, socketId: socket.id });
+  });
+
   // ✅ Handle incoming messages with validation and rate limiting
   socket.on("chat-message", (data) => {
     // Server-side message validation
